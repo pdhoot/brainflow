@@ -96,6 +96,7 @@ int prepare_session (int board_id, const char *json_brainflow_input_params)
     std::shared_ptr<Board> board = NULL;
     switch (static_cast<BoardIds> (board_id))
     {
+        // Core boards
         case BoardIds::PLAYBACK_FILE_BOARD:
             board = std::shared_ptr<Board> (new PlaybackFileBoard (params));
             break;
@@ -105,131 +106,12 @@ int prepare_session (int board_id, const char *json_brainflow_input_params)
         case BoardIds::SYNTHETIC_BOARD:
             board = std::shared_ptr<Board> (new SyntheticBoard (params));
             break;
-        case BoardIds::CYTON_BOARD:
-            board = std::shared_ptr<Board> (new Cyton (params));
-            break;
-        case BoardIds::GANGLION_BOARD:
-            board = std::shared_ptr<Board> (new Ganglion (params));
-            break;
-        case BoardIds::CYTON_DAISY_BOARD:
-            board = std::shared_ptr<Board> (new CytonDaisy (params));
-            break;
-        case BoardIds::GALEA_BOARD:
-            board = std::shared_ptr<Board> (new Galea (params));
-            break;
-        case BoardIds::GANGLION_WIFI_BOARD:
-            board = std::shared_ptr<Board> (new GanglionWifi (params));
-            break;
-        case BoardIds::CYTON_WIFI_BOARD:
-            board = std::shared_ptr<Board> (new CytonWifi (params));
-            break;
-        case BoardIds::CYTON_DAISY_WIFI_BOARD:
-            board = std::shared_ptr<Board> (new CytonDaisyWifi (params));
-            break;
-        case BoardIds::BRAINBIT_BOARD:
-            board = std::shared_ptr<Board> (new BrainBit (params));
-            break;
-        case BoardIds::UNICORN_BOARD:
-            board = std::shared_ptr<Board> (new UnicornBoard (params));
-            break;
-        case BoardIds::CALLIBRI_EEG_BOARD:
-            board = std::shared_ptr<Board> (new CallibriEEG (params));
-            break;
-        case BoardIds::CALLIBRI_EMG_BOARD:
-            board = std::shared_ptr<Board> (new CallibriEMG (params));
-            break;
-        case BoardIds::CALLIBRI_ECG_BOARD:
-            board = std::shared_ptr<Board> (new CallibriECG (params));
-            break;
-        // notion 1, notion 2 and crown have the same class
-        // the only difference are get_eeg_names and sampling_rate
-        case BoardIds::NOTION_1_BOARD:
-            board = std::shared_ptr<Board> (new NotionOSC (board_id, params));
-            break;
-        case BoardIds::NOTION_2_BOARD:
-            board = std::shared_ptr<Board> (new NotionOSC (board_id, params));
-            break;
-        case BoardIds::CROWN_BOARD:
-            board = std::shared_ptr<Board> (new NotionOSC (board_id, params));
-            break;
-        case BoardIds::GFORCE_PRO_BOARD:
-            board = std::shared_ptr<Board> (new GforcePro (params));
-            break;
-        case BoardIds::FREEEEG32_BOARD:
-            board = std::shared_ptr<Board> (new FreeEEG ((int)BoardIds::FREEEEG32_BOARD, params));
-            break;
-        case BoardIds::FREEEEG128_BOARD:
-            board = std::shared_ptr<Board> (new FreeEEG ((int)BoardIds::FREEEEG128_BOARD, params));
-            break;
-        case BoardIds::BRAINBIT_BLED_BOARD:
-            board = std::shared_ptr<Board> (new BrainBitBLED (params));
-            break;
-        case BoardIds::GFORCE_DUAL_BOARD:
-            board = std::shared_ptr<Board> (new GforceDual (params));
-            break;
-        case BoardIds::GALEA_SERIAL_BOARD:
-            board = std::shared_ptr<Board> (new GaleaSerial (params));
-            break;
+        // Muse boards
         case BoardIds::MUSE_S_BLED_BOARD:
             board = std::shared_ptr<Board> (new MuseBLED (board_id, params));
             break;
         case BoardIds::MUSE_2_BLED_BOARD:
             board = std::shared_ptr<Board> (new MuseBLED (board_id, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_410_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_410_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_411_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_411_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_430_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_430_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_211_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_211_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_212_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_212_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_213_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_213_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_214_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_214_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_215_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_215_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_221_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_221_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_222_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_222_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_223_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_223_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_224_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_224_BOARD, params));
-            break;
-        case BoardIds::ANT_NEURO_EE_225_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_225_BOARD, params));
-            break;
-        case BoardIds::ENOPHONE_BOARD:
-            board = std::shared_ptr<Board> (new Enophone (params));
             break;
         case BoardIds::MUSE_2_BOARD:
             board = std::shared_ptr<Board> (new Muse (board_id, params));
@@ -237,76 +119,11 @@ int prepare_session (int board_id, const char *json_brainflow_input_params)
         case BoardIds::MUSE_S_BOARD:
             board = std::shared_ptr<Board> (new Muse (board_id, params));
             break;
-        case BoardIds::BRAINALIVE_BOARD:
-            board = std::shared_ptr<Board> (new BrainAlive (params));
-            break;
         case BoardIds::MUSE_2016_BOARD:
             board = std::shared_ptr<Board> (new Muse (board_id, params));
             break;
         case BoardIds::MUSE_2016_BLED_BOARD:
             board = std::shared_ptr<Board> (new MuseBLED (board_id, params));
-            break;
-        case BoardIds::EXPLORE_4_CHAN_BOARD:
-            board = std::shared_ptr<Board> (new Explore (board_id, params));
-            break;
-        case BoardIds::EXPLORE_8_CHAN_BOARD:
-            board = std::shared_ptr<Board> (new Explore (board_id, params));
-            break;
-        case BoardIds::GANGLION_NATIVE_BOARD:
-            board = std::shared_ptr<Board> (new GanglionNative (params));
-            break;
-        case BoardIds::EMOTIBIT_BOARD:
-            board = std::shared_ptr<Board> (new Emotibit (params));
-            break;
-        case BoardIds::GALEA_BOARD_V4:
-            board = std::shared_ptr<Board> (new GaleaV4 (params));
-            break;
-        case BoardIds::GALEA_SERIAL_BOARD_V4:
-            board = std::shared_ptr<Board> (new GaleaSerialV4 (params));
-            break;
-        case BoardIds::ANT_NEURO_EE_511_BOARD:
-            board = std::shared_ptr<Board> (
-                new AntNeuroBoard ((int)BoardIds::ANT_NEURO_EE_511_BOARD, params));
-            break;
-        case BoardIds::NTL_WIFI_BOARD:
-            board = std::shared_ptr<Board> (new NtlWifi (params));
-            break;
-        case BoardIds::AAVAA_V3_BOARD:
-            board = std::shared_ptr<Board> (new AAVAAv3 (params));
-            break;
-        case BoardIds::EXPLORE_PLUS_8_CHAN_BOARD:
-            board = std::shared_ptr<Board> (new Explore (board_id, params));
-            break;
-        case BoardIds::EXPLORE_PLUS_32_CHAN_BOARD:
-            board = std::shared_ptr<Board> (new Explore (board_id, params));
-            break;
-        case BoardIds::PIEEG_BOARD:
-            board = std::shared_ptr<Board> (new PIEEGBoard (board_id, params));
-            break;
-        case BoardIds::SYNCHRONI_TRIO_3_CHANNELS_BOARD:
-            board = std::shared_ptr<Board> (new SynchroniBoard (board_id, params));
-            break;
-        case BoardIds::SYNCHRONI_OCTO_8_CHANNELS_BOARD:
-            board = std::shared_ptr<Board> (new SynchroniBoard (board_id, params));
-            break;
-        case BoardIds::SYNCHRONI_NEO_8_CHANNELS_BOARD:
-            board = std::shared_ptr<Board> (new SynchroniBoard (board_id, params));
-            break;
-        case BoardIds::SYNCHRONI_UNO_1_CHANNELS_BOARD:
-            board = std::shared_ptr<Board> (new SynchroniBoard (board_id, params));
-            break;
-        case BoardIds::OB5000_8_CHANNELS_BOARD:
-            board = std::shared_ptr<Board> (new SynchroniBoard (board_id, params));
-            break;
-        case BoardIds::OB3000_24_CHANNELS_BOARD:
-            board = std::shared_ptr<Board> (new SynchroniBoard (board_id, params));
-            break;
-        case BoardIds::NEUROPAWN_KNIGHT_BOARD:
-            board =
-                std::shared_ptr<Board> (new Knight ((int)BoardIds::NEUROPAWN_KNIGHT_BOARD, params));
-            break;
-        case BoardIds::BIOLISTENER_BOARD:
-            board = std::shared_ptr<Board> (new BioListener<8> (board_id, params));
             break;
         default:
             return (int)BrainFlowExitCodes::UNSUPPORTED_BOARD_ERROR;

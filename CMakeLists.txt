@@ -17,6 +17,9 @@ SET (TARGETS_EXPORT_NAME brainflowTargets)
 SET (PACKAGE_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 SET (PACKAGE_INC_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/inc)
 
+# add option to build only Muse boards
+option (BUILD_ONLY_MUSE "Build only Muse boards" OFF)
+
 option (USE_LIBFTDI "USE_LIBFTDI" OFF)
 option (USE_OPENMP "USE_OPENMP" OFF)
 option (WARNINGS_AS_ERRORS "WARNINGS_AS_ERRORS" OFF)
@@ -45,7 +48,47 @@ if (WARNINGS_AS_ERRORS)
     endif ()
 endif (WARNINGS_AS_ERRORS)
 
-include (${CMAKE_CURRENT_SOURCE_DIR}/src/board_controller/build.cmake)
+# Muse-specific build option
+if (BUILD_ONLY_MUSE)
+    message (STATUS "Building only Muse boards")
+    add_definitions (-DBUILD_ONLY_MUSE)
+    set (BOARD_CONTROLLER_SRC
+        ${CMAKE_HOME_DIRECTORY}/src/utils/timestamp.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/data_buffer.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/os_serial.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/os_serial_ioctl.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/serial.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/libftdi_serial.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/socket_client_tcp.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/socket_client_udp.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/socket_server_tcp.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/socket_server_udp.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/multicast_client.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/multicast_server.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/broadcast_client.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/utils/broadcast_server.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/board_controller.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/board_info_getter.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/board.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/brainflow_boards.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/streaming_board.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/synthetic_board.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/dyn_lib_board.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/bt_lib_board.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/playback_file_board.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/file_streamer.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/multicast_streamer.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/plotjuggler_udp_streamer.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/ble_lib_board.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/muse/muse_bled.cpp
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/muse/muse.cpp
+    )
+    include (${CMAKE_HOME_DIRECTORY}/src/board_controller/muse/muse_bglib/build.cmake)
+else ()
+    # Include regular build.cmake that builds all boards
+    include (${CMAKE_HOME_DIRECTORY}/src/board_controller/build.cmake)
+endif (BUILD_ONLY_MUSE)
+
 include (${CMAKE_CURRENT_SOURCE_DIR}/src/data_handler/build.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/src/ml/build.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/cpp_package/build.cmake)

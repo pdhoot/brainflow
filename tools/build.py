@@ -130,6 +130,11 @@ def prepare_args():
     ble_default = False
     tests_default = False
 
+    # Add option to build only Muse boards
+    parser.add_argument('--only-muse', dest='only_muse', action='store_true',
+                        help='Build only Muse boards')
+    parser.set_defaults(only_muse=False)
+
     if platform.system() == 'Windows':
         bluetooth_default = True
         parser.add_argument('--oymotion', dest='oymotion', action='store_true')
@@ -287,6 +292,8 @@ def config(args):
         cmd_config.append('-DBUILD_ONNX=ON')
     if hasattr(args, 'tests') and args.tests:
         cmd_config.append('-DBUILD_TESTS=ON')
+    if hasattr(args, 'only_muse') and args.only_muse:
+        cmd_config.append('-DBUILD_ONLY_MUSE=ON')
     cmd_config.append(brainflow_root_folder)
     run_command(cmd_config, args.build_dir)
 
