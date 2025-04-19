@@ -84,6 +84,132 @@ if (BUILD_ONLY_MUSE)
         ${CMAKE_HOME_DIRECTORY}/src/board_controller/muse/muse.cpp
     )
     include (${CMAKE_HOME_DIRECTORY}/src/board_controller/muse/muse_bglib/build.cmake)
+    
+    # Set up library name based on architecture
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        SET (BOARD_CONTROLLER_NAME "BoardController")
+        if (APPLE)
+            SET (BOARD_CONTROLLER_COMPILED_NAME "libBoardController.dylib")
+        elseif (UNIX)
+            SET (BOARD_CONTROLLER_COMPILED_NAME "libBoardController.so")
+        else ()
+            SET (BOARD_CONTROLLER_COMPILED_NAME "BoardController.dll")
+            SET (BOARD_CONTROLLER_COMPILED_NAME_DOT_LIB "BoardController.lib")
+        endif (APPLE)
+    else (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        if (APPLE)
+            SET (BOARD_CONTROLLER_NAME "BoardController")
+            SET (BOARD_CONTROLLER_COMPILED_NAME "libBoardController.dylib")
+        elseif (UNIX)
+            SET (BOARD_CONTROLLER_NAME "BoardController")
+            SET (BOARD_CONTROLLER_COMPILED_NAME "libBoardController.so")
+        else ()
+            SET (BOARD_CONTROLLER_NAME "BoardController32")
+            SET (BOARD_CONTROLLER_COMPILED_NAME "BoardController32.dll")
+            SET (BOARD_CONTROLLER_COMPILED_NAME_DOT_LIB "BoardController32.lib")
+        endif (APPLE)
+    endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    
+    # Create the library
+    add_library (
+        ${BOARD_CONTROLLER_NAME} SHARED
+        ${BOARD_CONTROLLER_SRC}
+    )
+
+    # Set include directories
+    target_include_directories (
+        ${BOARD_CONTROLLER_NAME} PRIVATE
+        ${CMAKE_HOME_DIRECTORY}/third_party/
+        ${CMAKE_HOME_DIRECTORY}/third_party/json
+        ${CMAKE_HOME_DIRECTORY}/third_party/http
+        ${CMAKE_HOME_DIRECTORY}/third_party/oscpp/include
+        ${CMAKE_HOME_DIRECTORY}/src/utils/inc
+        ${CMAKE_HOME_DIRECTORY}/src/utils/bluetooth/inc
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/inc
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/muse/inc
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/muse/muse_bglib/inc
+    )
+
+    # Set compile definitions
+    target_compile_definitions(${BOARD_CONTROLLER_NAME} PRIVATE NOMINMAX BRAINFLOW_VERSION=${BRAINFLOW_VERSION})
+
+    # Set output directories
+    set_target_properties (${BOARD_CONTROLLER_NAME}
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/compiled
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/compiled
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/compiled
+    )
+
+    # Handle system-specific linking
+    if (UNIX AND NOT ANDROID)
+        target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE pthread dl)
+    endif (UNIX AND NOT ANDROID)
+    if (ANDROID)
+        find_library (log-lib log)
+        target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE log)
+    endif (ANDROID)
+
+    # Install the library
+    install (
+        FILES
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_controller.h
+        ${CMAKE_HOME_DIRECTORY}/src/utils/inc/brainflow_constants.h
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_info_getter.h
+        ${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/brainflow_input_params.h
+        ${CMAKE_HOME_DIRECTORY}/src/utils/inc/shared_export.h
+        ${CMAKE_HOME_DIRECTORY}/src/utils/inc/brainflow_array.h
+        ${CMAKE_HOME_DIRECTORY}/src/utils/inc/brainflow_exception.h
+        ${CMAKE_HOME_DIRECTORY}/third_party/json/json.hpp
+        DESTINATION inc
+    )
+
+    install (
+        TARGETS ${BOARD_CONTROLLER_NAME}
+        EXPORT ${TARGETS_EXPORT_NAME}
+        RUNTIME DESTINATION lib
+        LIBRARY DESTINATION lib
+        INCLUDES DESTINATION inc
+        ARCHIVE DESTINATION lib
+    )
+    
+    # Copy library to package directories
+    if (MSVC)
+        add_custom_command (TARGET ${BOARD_CONTROLLER_NAME} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/nodejs_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/python_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/julia_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/java_package/brainflow/src/main/resources/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/csharp_package/brainflow/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_controller.h" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/inc/board_controller.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_info_getter.h" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/inc/board_info_getter.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/utils/inc/shared_export_matlab.h" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/inc/shared_export.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/$<CONFIG>/${BOARD_CONTROLLER_COMPILED_NAME_DOT_LIB}" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME_DOT_LIB}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_controller.h" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/inc/board_controller.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_info_getter.h" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/inc/board_info_getter.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/utils/inc/brainflow_constants.h" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/inc/brainflow_constants.h"
+        )
+    endif (MSVC)
+    if (UNIX AND NOT ANDROID)
+        add_custom_command (TARGET ${BOARD_CONTROLLER_NAME} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/nodejs_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/python_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/julia_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/java_package/brainflow/src/main/resources/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/csharp_package/brainflow/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_controller.h" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/inc/board_controller.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_info_getter.h" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/inc/board_info_getter.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/utils/inc/shared_export_matlab.h" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/inc/shared_export.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/utils/inc/brainflow_constants.h" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/inc/brainflow_constants.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/matlab_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/compiled/${BOARD_CONTROLLER_COMPILED_NAME}" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/lib/${BOARD_CONTROLLER_COMPILED_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_controller.h" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/inc/board_controller.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/board_controller/inc/board_info_getter.h" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/inc/board_info_getter.h"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_HOME_DIRECTORY}/src/utils/inc/brainflow_constants.h" "${CMAKE_HOME_DIRECTORY}/rust_package/brainflow/inc/brainflow_constants.h"
+        )
+    endif (UNIX AND NOT ANDROID)
 else ()
     # Include regular build.cmake that builds all boards
     include (${CMAKE_HOME_DIRECTORY}/src/board_controller/build.cmake)
