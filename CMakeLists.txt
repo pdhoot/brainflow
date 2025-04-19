@@ -52,6 +52,20 @@ endif (WARNINGS_AS_ERRORS)
 if (BUILD_ONLY_MUSE)
     message (STATUS "Building only Muse boards")
     add_definitions (-DBUILD_ONLY_MUSE)
+    
+    # For iOS builds, disable deprecated warnings treated as errors
+    if (APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET)
+        message (STATUS "Configuring for iOS build with deployment target ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+        add_compile_options (-Wno-deprecated-declarations)
+        add_compile_options (-Wno-error=deprecated-declarations)
+        
+        # iOS-specific definitions to handle platform differences
+        add_definitions (-DIOS_PLATFORM)
+        add_definitions (-DNO_FILESYSTEM)
+        # Prevent unsupported thread operations on iOS
+        add_definitions (-DSIMPLE_THREADING)
+    endif ()
+    
     set (BOARD_CONTROLLER_SRC
         ${CMAKE_HOME_DIRECTORY}/src/utils/timestamp.cpp
         ${CMAKE_HOME_DIRECTORY}/src/utils/data_buffer.cpp
@@ -143,7 +157,14 @@ if (BUILD_ONLY_MUSE)
 
     # Handle system-specific linking
     if (UNIX AND NOT ANDROID)
-        target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE pthread dl)
+        # For iOS builds, we need different linking options
+        if (APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET)
+            # iOS doesn't need pthread and dl linking
+            target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE)
+        else()
+            # Regular macOS or Linux builds
+            target_link_libraries (${BOARD_CONTROLLER_NAME} PRIVATE pthread dl)
+        endif()
     endif (UNIX AND NOT ANDROID)
     if (ANDROID)
         find_library (log-lib log)
