@@ -64,6 +64,8 @@ if (BUILD_ONLY_MUSE)
         add_definitions (-DNO_FILESYSTEM)
         # Prevent unsupported thread operations on iOS
         add_definitions (-DSIMPLE_THREADING)
+        # Fix for uint8 type issue
+        add_definitions (-Duint8=unsigned\ char)
     endif ()
     
     set (BOARD_CONTROLLER_SRC
