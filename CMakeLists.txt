@@ -66,6 +66,8 @@ if (BUILD_ONLY_MUSE)
         add_definitions (-DSIMPLE_THREADING)
         # Fix for uint8 type issue
         add_definitions (-Duint8=unsigned\ char)
+        # Disable missing declaration warnings
+        add_compile_options (-Wno-missing-declarations)
     endif ()
     
     set (BOARD_CONTROLLER_SRC
